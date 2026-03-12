@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ray Moviez | Stream & Download</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body { background-color: #0c0c0c; color: #eee; font-family: 'Roboto', sans-serif; }
+        .movie-card { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 4px; overflow: hidden; position: relative; transition: 0.3s; cursor: pointer; }
+        .movie-card:hover { border-color: #E50914; transform: scale(1.05); z-index: 10; }
+        .quality-badge { position: absolute; top: 8px; left: 8px; background: #E50914; color: white; padding: 2px 6px; font-size: 10px; font-weight: bold; border-radius: 2px; }
+        .section-title { border-left: 4px solid #E50914; padding-left: 12px; font-weight: 800; text-transform: uppercase; margin: 30px 0 20px 0; font-size: 16px; color: #fff; }
+        .nav-link:hover { color: #E50914; border-bottom: 2px solid #E50914; }
+    </style>
+</head>
+<body>
+
+    <header class="bg-[#111] border-b border-[#222] p-5 sticky top-0 z-50 shadow-2xl">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+            <h1 class="text-3xl font-black text-white italic tracking-tighter uppercase">RAY <span class="text-[#E50914]">MOVIEZ</span></h1>
+            <div class="relative w-full md:w-[500px]">
+                <input type="text" id="search-input" placeholder="Search Bollywood, Hollywood, 18+..." 
+                       class="bg-[#1a1a1a] border border-[#333] text-white w-full py-2.5 px-12 rounded-full text-sm focus:border-[#E50914] outline-none transition-all">
+                <i class="fas fa-search absolute left-5 top-3.5 text-gray-500"></i>
+            </div>
+        </div>
+    </header>
+
+    <nav class="bg-[#181818] p-3 border-b border-[#222] sticky top-[80px] z-40 overflow-x-auto">
+        <div class="max-w-7xl mx-auto flex gap-8 px-4 text-[11px] font-bold uppercase tracking-widest text-gray-400">
+            <a href="#bollywood" class="nav-link">Bollywood</a>
+            <a href="#hollywood" class="nav-link">Hollywood</a>
+            <a href="#series" class="nav-link">Web Series</a>
+            <a href="#adult" class="nav-link text-red-500">18+ Adult</a>
+        </div>
+    </nav>
+
+    <main class="max-w-7xl mx-auto p-4 md:p-8">
+        
+        <div id="search-section" style="display:none;">
+            <h2 class="section-title text-yellow-500">Search Results</h2>
+            <div id="search-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6"></div>
+        </div>
+
+        <section id="bollywood">
+            <h2 class="section-title">Bollywood Hits</h2>
+            <div id="hindi-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6"></div>
+        </section>
+
+        <section id="hollywood">
+            <h2 class="section-title">Hollywood Blockbusters</h2>
+            <div id="hollywood-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6"></div>
+        </section>
+
+        <section id="series">
+            <h2 class="section-title">Trending Web Series</h2>
+            <div id="series-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6"></div>
+        </section>
+
+        <section id="adult">
+            <h2 class="section-title text-red-600">Adult Content (18+)</h2>
+            <div id="adult-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6"></div>
+        </section>
+
+    </main>
+
+    <footer class="bg-[#111] p-12 mt-20 border-t border-[#222] text-center text-gray-600 text-[10px] tracking-widest uppercase">
+        <p>© 2026 Ray Moviez | Powerd by TMDB API</p>
+    </footer>
+
+    <script>
+        const API_KEY = '84a045e115b52efb74f822498bb7daf3';
+        const IMG_URL = 'https://image.tmdb.org/t/p/w500';
+
+        // Function to Fetch Content
+        async function fetchContent(url, gridId, isAdult = false) {
+            try {
+                const res = await fetch(url);
+                const data = await res.json();
+                const grid = document.getElementById(gridId);
+                grid.innerHTML = '';
+
+                data.results.slice(0, 12).forEach(item => {
+                    if (item.poster_path) {
+                        const card = document.createElement('div');
+                        card.className = 'movie-card';
+                        card.innerHTML = `
+                            <div class="quality-badge">${isAdult ? '18+' : 'HDRip'}</div>
+                            <img src="${IMG_URL + item.poster_path}" class="w-full h-auto" loading="lazy">
+                            <div class="p-3 text-center">
+                                <h3 class="text-[10px] font-bold truncate uppercase">${item.title || item.name}</h3>
+                                <p class="text-[8px] text-gray-500 mt-1">${(item.release_date || item.first_air_date || '2026').split('-')[0]}</p>
+                            </div>
+                        `;
+                        grid.appendChild(card);
+                    }
+                });
+            } catch (e) { console.log("Error loading grid: " + gridId); }
+        }
+
+        // Search System
+        document.getElementById('search-input').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                const query = e.target.value;
+                if (query.length > 2) {
+                    document.getElementById('search-section').style.display = 'block';
+                    fetchContent(`https://api.themoviedb.org/3/search/multi?api_key=${API_KEY}&query=${query}`, 'search-grid');
+                    window.scrollTo({top: 200, behavior: 'smooth'});
+                }
+            }
+        });
+
+        // Initialize All Sections
+        function init() {
+            // Bollywood (Hindi)
+            fetchContent(`https://api.themoviedb.org/3/discover/movie?api_key=${API_KEY}&with_original_language=hi&sort_by=popularity.desc`, 'hindi-grid');
+            
+            // Hollywood
+            fetchContent(`https://api.themoviedb.org/3/movie/popular?api_key=${API_KEY}&language=en-US`, 'hollywood-grid');
+            
+            // Series
+            fetchContent(`https://api.themoviedb.org/3/tv/popular?api_key=${API_KEY}&language=en-US`, 'series-grid');
+            
+            // Adult (TMDB has a filter for this, we use include_adult=true)
+            fetchContent(`https://api.themoviedb.org/3/discover/movie?api_key=${API_KEY}&include_adult=true&sort_by=popularity.desc`, 'adult-grid', true);
+        }
+
+        init();
+    </script>
+</body>
+</html>
